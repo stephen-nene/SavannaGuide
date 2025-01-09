@@ -1,4 +1,11 @@
+
+
 - [Form ](https://docs.google.com/forms/d/e/1FAIpQLSd-xt-us0EBCNkuYdXNJEkEiaMj_oW28e2YJzWzU6nG2VfIjQ/viewform)
+
+## Deadline for submission
+24 January 2025
+
+- [Links To apply](https://afkenya.org/call-for-projects/)
 
 ## Requirements
 1. Share links to previous work/portfolio
