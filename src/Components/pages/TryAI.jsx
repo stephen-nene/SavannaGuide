@@ -10,16 +10,19 @@ import {
 } from "react-icons/fa";
 import { Button, Modal, Typography } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
-const { Text,Title } = Typography;
+const { Text, Title } = Typography;
 
-import {FcCamera} from "react-icons/fc"
-import SavaGuide  from "../../assets/images/savaguide1.png";
+import { FcCamera } from "react-icons/fc";
+import SavaGuide from "../../assets/images/savaguide1.png";
+import { useEffect } from "react";
+import { message } from "antd";
 
 const TryAI = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("cultural");
+  const [selectedOption, setSelectedOption] = useState("tourist");
 
   // Sample chat history
   const sampleHistory = [
@@ -37,10 +40,10 @@ const TryAI = () => {
 
   // Sample interaction categories
   const categories = [
+    { id: "location", label: "Locale" },
     { id: "cultural", label: "Cultural Guide" },
     { id: "tourist", label: "Tourist Info" },
     { id: "educational", label: "Learn History" },
-    { id: "customs", label: "Local Customs" },
   ];
 
   return (
@@ -79,10 +82,14 @@ const TryAI = () => {
             </div>
           </div>
 
-                  {/* Main Content Area */}
-                  
+          {/* Main Content Area */}
+
+            <LocationModal
+              isModalOpen={isModalOpen}
+              setIsModalOpen={setIsModalOpen}
+              selectedOption={selectedOption}
+            />
           <div className="md:col-span-3 bg-white rounded-lg shadow-sm min-h-[600px] flex flex-col">
-            <LocationModal />
             {/* 3D Avatar Display Area */}
             <div className="h-96 bg-gray-800 rounded-t-lg relative">
               {/* Placeholder for 3D model - replace with actual implementation */}
@@ -235,15 +242,13 @@ const TryAI = () => {
 
 export default TryAI;
 
-
-
-function LocationModal() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+function LocationModal({ isModalOpen, setIsModalOpen, selectedOption }) {
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const handleGetLocation = async () => {
+    console.log("getong location");
     setLoading(true);
     setError(null);
 
@@ -293,17 +298,24 @@ function LocationModal() {
       }
     );
   };
+  useEffect(() => {
+    if (selectedOption === "location") {
+      //    handleGetLocation
+      setIsModalOpen(true);
+    }
+  }, [selectedOption]);
 
   return (
-    <div className="flex justify-center items-center my-4">
+    <>
+      {/* <div className="flex justify-center items-center my-4"> */}
       {/* Button to Trigger Modal */}
-      <Button
+      {/* <Button
         type="primary"
         icon={<EnvironmentOutlined />}
         onClick={() => setIsModalOpen(true)}
       >
         Share Your Location
-      </Button>
+      </Button> */}
 
       {/* Ant Design Modal */}
       <Modal
@@ -359,6 +371,7 @@ function LocationModal() {
           )}
         </div>
       </Modal>
-    </div>
+      {/* </div> */}
+    </>
   );
 }
