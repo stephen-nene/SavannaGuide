@@ -16,3 +16,14 @@
 6. [Project timeline](https://docs.google.com/spreadsheets/d/1Wf9-BCnVfTJAGgcAdYCCd4m9JZ9aKEwm/edit?gid=1331232422#gid=1331232422)
 
 * you dont have to use those templates 
+
+# Something to rethink
+1. [Heros Section](https://medium.muz.li/how-to-create-a-great-website-hero-section-f22ec2f6e86a)
+
+
+# Tools needed
+1. A 3D model avatar with lip sync
+2. An AI model with natural language processing capabilities
+3. Vision `<>` text  understanding 
+4. Text to Voice model
+5. Authentication systems
