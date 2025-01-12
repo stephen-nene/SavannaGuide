@@ -9,7 +9,7 @@ import {
   FaInfoCircle,
 } from "react-icons/fa";
 import { Button, Modal, Typography } from "antd";
-import { EnvironmentOutlined } from "@ant-design/icons";
+import ReactMarkdown from "react-markdown";
 const { Text, Title } = Typography;
 
 import { FcCamera } from "react-icons/fc";
@@ -19,24 +19,70 @@ import { message } from "antd";
 
 const TryAI = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [message, setMessage] = useState("");
+  const [userMessage, setUserMessage] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedOption, setSelectedOption] = useState("tourist");
+  const [chatHistory, setChatHistory] = useState([
+    {
+      type: "bot",
+      text: "Hello, My Name is Biggie. Your guide to experiencing Kenyan culture like never before. Try asking me something about Kenyan culture.",
+    },
+  ]);
 
-  // Sample chat history
-  const sampleHistory = [
-    { type: "user", text: "Tell me about Kenyan wedding traditions" },
-    {
-      type: "ai",
-      text: 'Traditional Kenyan weddings are rich in cultural symbolism. For example, in many communities, the dowry ceremony called "Ruracio" is an essential part where...',
-    },
-    { type: "user", text: "What languages are spoken in Kenya?" },
-    {
-      type: "ai",
-      text: "Kenya has two official languages: English and Swahili. However, there are over 40 indigenous languages spoken across different communities...",
-    },
-  ];
+    const handleSendMessage = async () => {
+      if (!userMessage) return;
+      let loadingMessage = message.loading("Getting AI response .....",0)
+
+      // Update chat with user's message
+      setChatHistory((prev) => [...prev, { type: "user", text: userMessage }]);
+
+      try {
+        // Make API request
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/v1/ai/ask_question",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ question: userMessage }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+
+          // Update chat with bot's response
+          setChatHistory((prev) => [
+            ...prev,
+            {
+              type: "bot",
+              text: data.response || "Sorry, I couldn't fetch the answer.",
+            },
+          ]);
+        } else {
+          setChatHistory((prev) => [
+            ...prev,
+            { type: "bot", text: "Something went wrong. Please try again." },
+          ]);
+        }
+      } catch (error) {
+        console.error("Error communicating with the AI endpoint:", error);
+        setChatHistory((prev) => [
+          ...prev,
+          {
+            type: "bot",
+            text: "Unable to connect to the server. Please check your connection.",
+          },
+        ]);
+      } finally {
+        loadingMessage()
+      }
+
+      // Clear the input field
+      setUserMessage("");
+    };
 
   // Sample interaction categories
   const categories = [
@@ -84,11 +130,11 @@ const TryAI = () => {
 
           {/* Main Content Area */}
 
-            <LocationModal
-              isModalOpen={isModalOpen}
-              setIsModalOpen={setIsModalOpen}
-              selectedOption={selectedOption}
-            />
+          <LocationModal
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            selectedOption={selectedOption}
+          />
           <div className="md:col-span-3 bg-white rounded-lg shadow-sm min-h-[600px] flex flex-col">
             {/* 3D Avatar Display Area */}
             <div className="h-96 bg-gray-800 rounded-t-lg relative">
@@ -112,35 +158,25 @@ const TryAI = () => {
             <div className="flex-1 p-4 flex flex-col">
               {/* Chat Messages */}
               <div className="flex-1 overflow-y-auto mb-4">
-                <div className={`mb-4 text-right`}>
+                {chatHistory.map((msg, index) => (
                   <div
-                    className={`inline-block p-3 rounded-lg max-w-[80%] bg-indigo-100 text-indigo-900 
-                      `}
+                    key={index}
+                    className={`mb-4 ${
+                      msg.type === "user" ? "text-right" : "text-left"
+                    }`}
                   >
-                    Hello, My Name is Biggie. Your guide to having and
-                    exerinecing kenyan culture like you have never before. Try
-                    asking me something about the keyan culture
-                  </div>
-                </div>
-                {showHistory &&
-                  sampleHistory.map((msg, index) => (
                     <div
-                      key={index}
-                      className={`mb-4 ${
-                        msg.type === "user" ? "text-right" : "text-left"
+                      className={`inline-block p-3 rounded-lg max-w-[80%] ${
+                        msg.type === "user"
+                          ? "bg-indigo-100 text-indigo-900"
+                          : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      <div
-                        className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                          msg.type === "user"
-                            ? "bg-indigo-100 text-indigo-900"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {msg.text}
-                      </div>
+                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                     
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
 
               {/* Input Area */}
@@ -178,8 +214,8 @@ const TryAI = () => {
                   <div className="flex-1 relative">
                     <input
                       type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
+                      value={userMessage}
+                      onChange={(e) => setUserMessage(e.target.value)}
                       placeholder="Ask your question..."
                       className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-indigo-500"
                     />
@@ -193,17 +229,14 @@ const TryAI = () => {
 
                   {/* Send Button */}
                   <button
-                    onClick={() => {
-                      console.log("Sending Message:", message);
-                      setMessage("");
-                    }}
-                    disabled={!message}
+                    onClick={handleSendMessage}
+                    disabled={!userMessage}
                     className={`p-3 rounded-full transition ${
-                      message
+                      userMessage
                         ? "bg-indigo-500 text-white hover:bg-indigo-600"
                         : "bg-gray-100 text-gray-400"
                     }`}
-                    aria-label="Send Message"
+                    aria-label="Send userMessage"
                   >
                     <FaPaperPlane size={20} />
                   </button>
